@@ -57,6 +57,7 @@ exports.createFoodSchema = Joi.object({
   location: Joi.string().required(),
   expiryDate: Joi.date().required(),
   status: Joi.string().valid('available', 'reserved', 'collected'),
+  expiryStatus: Joi.string().valid('eatable', 'spoiled'),
   image: Joi.string()
 });
 
@@ -67,5 +68,6 @@ exports.updateFoodSchema = Joi.object({
   location: Joi.string(),
   expiryDate: Joi.date(),
   status: Joi.string().valid('available', 'reserved', 'collected'),
+  expiryStatus: Joi.string().valid('eatable', 'spoiled'),
   image: Joi.string()
 }); 

@@ -61,6 +61,11 @@ const FoodSchema = new mongoose.Schema(
       enum: ['available', 'reserved', 'collected', 'partial'],
       default: 'available'
     },
+    expiryStatus: {
+      type: String,
+      enum: ['eatable', 'spoiled'],
+      default: 'eatable'
+    },
     image: {
       type: String,
       default: 'default-food.jpg'

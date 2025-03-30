@@ -3,6 +3,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
 const connectDB = require('./src/config/db');
+const { scheduleExpiryCheck } = require('./src/utils/cronJobs');
 
 // Load env vars
 dotenv.config();
@@ -41,4 +42,7 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  
+  // Start the cron job for checking expired food
+  scheduleExpiryCheck();
 }); 
