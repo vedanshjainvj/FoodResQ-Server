@@ -20,8 +20,14 @@ exports.getAllFood = async (req, res) => {
     // Create operators ($gt, $gte, etc)
     queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, match => `$${match}`);
     
+    // Default to showing only eatable food if no expiryStatus filter is provided
+    const parsedQuery = JSON.parse(queryStr);
+    if (!parsedQuery.expiryStatus) {
+      parsedQuery.expiryStatus = 'eatable';
+    }
+    
     // Finding resources
-    let foodQuery = Food.find(JSON.parse(queryStr)).populate({
+    let foodQuery = Food.find(parsedQuery).populate({
       path: 'createdBy',
       select: 'name role'
     });
@@ -45,7 +51,7 @@ exports.getAllFood = async (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 10;
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
-    const total = await Food.countDocuments(JSON.parse(queryStr));
+    const total = await Food.countDocuments(parsedQuery);
     
     foodQuery = foodQuery.skip(startIndex).limit(limit);
     
