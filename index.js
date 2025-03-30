@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
-const connectDB = require('./config/db');
+const connectDB = require('./src/config/db');
 
 // Load env vars
 dotenv.config();
@@ -11,9 +11,9 @@ dotenv.config();
 connectDB();
 
 // Route files
-const authRoutes = require('./routes/auth');
-const userRoutes = require('./routes/users');
-const foodRoutes = require('./routes/food');
+const authRoutes = require('./src/routes/auth');
+const userRoutes = require('./src/routes/users');
+const foodRoutes = require('./src/routes/food');
 
 const app = express();
 
