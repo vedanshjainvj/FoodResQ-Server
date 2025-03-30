@@ -1,5 +1,6 @@
 const Food = require('../models/Food');
 const ErrorResponse = require('../utils/errorResponse');
+const { uploadImage } = require('../utils/cloudinary');
 
 // @desc    Get all food listings
 // @route   GET /api/food
@@ -127,6 +128,19 @@ exports.createFood = async (req, res) => {
       });
     }
     
+    // Handle image upload if it exists
+    if (req.body.image && req.body.image !== 'default-food.jpg' && req.body.image.startsWith('data:image')) {
+      try {
+        const imageUrl = await uploadImage(req.body.image);
+        req.body.image = imageUrl;
+      } catch (uploadError) {
+        return res.status(400).json({
+          success: false,
+          error: 'Image upload failed. Please try again.'
+        });
+      }
+    }
+    
     const food = await Food.create(req.body);
     
     res.status(201).json({
@@ -169,6 +183,22 @@ exports.updateFood = async (req, res) => {
         success: false,
         error: 'You can only update your own food listings'
       });
+    }
+    
+    // Handle image upload if it exists and has changed
+    if (req.body.image && 
+        req.body.image !== food.image && 
+        req.body.image !== 'default-food.jpg' && 
+        req.body.image.startsWith('data:image')) {
+      try {
+        const imageUrl = await uploadImage(req.body.image);
+        req.body.image = imageUrl;
+      } catch (uploadError) {
+        return res.status(400).json({
+          success: false,
+          error: 'Image upload failed. Please try again.'
+        });
+      }
     }
     
     food = await Food.findByIdAndUpdate(req.params.id, req.body, {
