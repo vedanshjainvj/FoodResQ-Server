@@ -1,12 +1,36 @@
 const Food = require('../models/Food');
 const ErrorResponse = require('../utils/errorResponse');
 const { uploadImage } = require('../utils/cloudinary');
+const {
+  getCache,
+  setCache,
+  deleteCache,
+  deleteCacheByPattern,
+  generateFoodListCacheKey,
+  generateFoodDetailCacheKey
+} = require('../utils/redisUtils');
 
 // @desc    Get all food listings
 // @route   GET /api/food
 // @access  Public
 exports.getAllFood = async (req, res) => {
   try {
+    // Generate cache key based on query parameters
+    const cacheKey = generateFoodListCacheKey(req.query);
+    
+    // Try to get data from cache first
+    const cachedData = await getCache(cacheKey);
+    if (cachedData) {
+      return res.status(200).json({
+        success: true,
+        count: cachedData.count,
+        pagination: cachedData.pagination,
+        data: cachedData.data,
+        fromCache: true
+      });
+    }
+    
+    // If not in cache, proceed with database query
     // Add query parameters for filtering
     const query = { ...req.query };
     
@@ -75,12 +99,21 @@ exports.getAllFood = async (req, res) => {
       };
     }
     
-    res.status(200).json({
+    // Calculate total pages for frontend pagination
+    pagination.totalPages = Math.ceil(total / limit);
+    
+    // Prepare response data
+    const responseData = {
       success: true,
       count: food.length,
       pagination,
       data: food
-    });
+    };
+    
+    // Store in cache (expires in 5 minutes for listings to stay relatively fresh)
+    await setCache(cacheKey, { count: food.length, pagination, data: food }, 300);
+    
+    res.status(200).json(responseData);
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -94,7 +127,21 @@ exports.getAllFood = async (req, res) => {
 // @access  Public
 exports.getFood = async (req, res) => {
   try {
-    const food = await Food.findById(req.params.id).populate({
+    const foodId = req.params.id;
+    const cacheKey = generateFoodDetailCacheKey(foodId);
+    
+    // Try to get from cache first
+    const cachedFood = await getCache(cacheKey);
+    if (cachedFood) {
+      return res.status(200).json({
+        success: true,
+        data: cachedFood,
+        fromCache: true
+      });
+    }
+    
+    // If not in cache, get from database
+    const food = await Food.findById(foodId).populate({
       path: 'createdBy',
       select: 'name role'
     });
@@ -105,6 +152,9 @@ exports.getFood = async (req, res) => {
         error: 'Food listing not found'
       });
     }
+    
+    // Store in cache (expires in 15 minutes)
+    await setCache(cacheKey, food, 900);
     
     res.status(200).json({
       success: true,
@@ -148,6 +198,9 @@ exports.createFood = async (req, res) => {
     }
     
     const food = await Food.create(req.body);
+    
+    // Clear all food listings cache as we have a new item
+    await deleteCacheByPattern('food:list:*');
     
     res.status(201).json({
       success: true,
@@ -212,6 +265,12 @@ exports.updateFood = async (req, res) => {
       runValidators: true
     });
     
+    // Clear cache for this specific food item
+    await deleteCache(generateFoodDetailCacheKey(req.params.id));
+    
+    // Clear all food listings cache as we've updated an item
+    await deleteCacheByPattern('food:list:*');
+    
     res.status(200).json({
       success: true,
       data: food
@@ -255,6 +314,12 @@ exports.deleteFood = async (req, res) => {
     }
     
     await food.deleteOne();
+    
+    // Clear cache for this specific food item
+    await deleteCache(generateFoodDetailCacheKey(req.params.id));
+    
+    // Clear all food listings cache as we've deleted an item
+    await deleteCacheByPattern('food:list:*');
     
     res.status(200).json({
       success: true,
@@ -319,6 +384,12 @@ exports.acceptFood = async (req, res) => {
     
     // Save the updated food
     await food.save();
+    
+    // Clear cache for this specific food item
+    await deleteCache(generateFoodDetailCacheKey(req.params.id));
+    
+    // Clear all food listings cache as the quantities have changed
+    await deleteCacheByPattern('food:list:*');
     
     res.status(200).json({
       success: true,
