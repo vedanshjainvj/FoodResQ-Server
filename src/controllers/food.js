@@ -1,6 +1,8 @@
 const Food = require('../models/Food');
+const User = require('../models/User');
 const ErrorResponse = require('../utils/errorResponse');
 const { uploadImage } = require('../utils/cloudinary');
+const { sendFoodPostNotification } = require('../utils/sendWhatsappMessage');
 const {
   getCache,
   setCache,
@@ -201,6 +203,23 @@ exports.createFood = async (req, res) => {
     
     // Clear all food listings cache as we have a new item
     await deleteCacheByPattern('food:list:*');
+    
+    // Get admin's phone number and send WhatsApp notification
+    try {
+      const admin = await User.findById(req.user.id);
+      if (admin && admin.phone) {
+        // Format phone number if needed
+        const formattedPhone = admin.phone.startsWith('+') ? admin.phone : `+91${admin.phone}`;
+        
+        // Send notification asynchronously
+        sendFoodPostNotification(formattedPhone, food).catch(err => {
+          console.error('WhatsApp food notification error:', err);
+        });
+      }
+    } catch (err) {
+      console.error('Error fetching admin for notification:', err);
+      // Don't stop the response for notification errors
+    }
     
     res.status(201).json({
       success: true,

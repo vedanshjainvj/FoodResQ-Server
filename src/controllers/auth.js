@@ -1,11 +1,12 @@
 const User = require('../models/User');
+const { sendWelcomeWhatsappMsg } = require('../utils/sendWhatsappMessage');
 
 // @desc    Register user
 // @route   POST /api/auth/register
 // @access  Public
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, phone, role } = req.body;
 
     // Check if user already exists
     const userExists = await User.findOne({ email });
@@ -22,8 +23,19 @@ exports.register = async (req, res) => {
       name,
       email,
       password,
+      phone,
       role: role || 'user'
     });
+
+    // Send welcome message via WhatsApp if phone number is provided
+    if (phone) {
+      // Use formatted number with country code if needed
+      const formattedPhone = phone.startsWith('+') ? phone : `+91${phone}`;
+      // Send welcome message asynchronously (don't wait for it to complete)
+      sendWelcomeWhatsappMsg(formattedPhone, user).catch(err => {
+        console.error('WhatsApp welcome message error:', err);
+      });
+    }
 
     sendTokenResponse(user, 201, res);
   } catch (error) {
@@ -175,7 +187,9 @@ const sendTokenResponse = (user, statusCode, res) => {
       id: user._id,
       name: user.name,
       email: user.email,
-      role: user.role
+      role: user.role,
+      phone: user.phone,
+      location: user.location
     }
   });
 }; 

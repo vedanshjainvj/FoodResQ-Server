@@ -21,6 +21,9 @@ exports.registerSchema = Joi.object({
   name: Joi.string().min(3).max(50).required(),
   email: Joi.string().email().required(),
   password: Joi.string().min(6).required(),
+  phone: Joi.string().pattern(/^[0-9]{10,15}$/).required().messages({
+    'string.pattern.base': 'Phone number must contain 10-15 digits only'
+  }),
   role: Joi.string().valid('user', 'admin')
 });
 
