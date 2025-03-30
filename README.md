@@ -1,8 +1,10 @@
-![Alt Text](src/assets/aceHack.jpg);
-# 24-Hour Food Cycle Platform - Server Side
+<img src="https://media-hosting.imagekit.io/2999afdf01e04241/PHOTO-2025-03-29-17-16-31.jpg?Expires=1837930100&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=C0PTeUgGEitvIiO4Q1UPS0telKoPMTksIM00ddKkiVyXPDsrBBfc0cgRQ~6PDl3WgsvB4eHHZjSTojDVw0fz~ufqxSzL9brhxs2zmouIXJ8x3mAq67HfbPtnNzTsvou2cdLnsKjdrOTgrnj~r2CDlH67PFZTl3Iy5tbbHrcGZfPMr56iykhJKZyznG2T~i5vvj5w10eoZNiw-Kf4mtg~glvy75MDcrj-DVi~AKy64-TP1jt0kjNl~cD7j6YcuCDRJxrSWBnO7X~aG-BtMDVhRDagEfn7paMUJ~xEnk4VOk4a0l-QIGRK-f-OeoUEdPFebCvVVam0w3OmOlM6hJiqEw__" width="900">
+<img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="900">
+
+# FoodResQ - Food Waste Management
 
 ## 📌 Overview
-This is the server-side of the *24-hour food cycle platform*, responsible for managing food listings, user authentication, order processing, and automatic food expiry handling. The backend ensures secure and efficient operations, reducing food wastage by removing expired items.
+FoodResQ is a food management platform dedicated to reducing food wastage by efficiently redistributing surplus food. The backend system manages food listings, user authentication, order processing, and automatic food expiry handling, ensuring a streamlined process for suppliers, NGOs, and the community.
 
 ## 🚀 Features
 - 🛡 *User Authentication*: Secure login and registration.
@@ -15,11 +17,11 @@ This is the server-side of the *24-hour food cycle platform*, responsible for ma
 
 ## 🛠 Tech Stack
 - *Backend Framework*: Node.js (Express.js)
-- *Database*: MongoDB / PostgreSQL
+- *Database*: MongoDB
 - *Authentication*: JWT (JSON Web Token)
 - *API Handling*: REST API with Express.js
 - *Real-Time Features*: WebSockets / Firebase
-- *Storage*: Cloudinary / AWS S3 (for food images)
+- *Storage*: AWS S3 (for food images)
 
 ## Scalability
 
@@ -47,11 +49,15 @@ npm install  # or yarn install
 
 Create a .env file and add:
 
-PORT=5000
-DATABASE_URL=your_database_url
-JWT_SECRET=your_jwt_secret
-CLOUDINARY_API_KEY=your_cloudinary_key
-CLOUDINARY_API_SECRET=your_cloudinary_secret
+PORT
+DATABASE_URL
+JWT_SECRET
+CLOUDINARY_API_KEY
+CLOUDINARY_API_SECRET
+REDIS_HOST
+REDIS_PORT
+REDIS_PASSWORD
+WHATSAPP_API_TOKEN
 
 4️⃣ Run the Server in Development Mode
 
